@@ -5,10 +5,11 @@ package cmd
 
 import (
 	"encoding/json"
-	"log"
-	"net/http"
-
+	"fmt"
 	"github.com/spf13/cobra"
+	"io/ioutil"
+	"log"
+	http "net/http"
 )
 
 // randomCmd represents the random command
@@ -23,7 +24,6 @@ var randomCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(randomCmd)
-
 }
 
 type Joke struct {
@@ -32,28 +32,40 @@ type Joke struct {
 	Status int    `json:"status"`
 }
 
-func getRandJoke() Joke {
-	resp, err := http.Get("https://icanhazdadjoke.com/")
-	if err != nil {
-		log.Fatalln(err)
+func getRandJoke() {
+	url := "https://icanhazdadjoke.com/"
+	responseBytes := getJokeData(url)
+	joke := Joke{}
+
+	if err := json.Unmarshal(responseBytes, &joke); err != nil {
+		log.Printf("Error: %v", err)
 	}
-	defer resp.Body.Close()
 
-	var joke Joke
-	json.NewDecoder(resp.Body).Decode(&joke)
-
-	return joke
+	fmt.Println(string(joke.Joke))
 }
 
 func getJokeData(baseAPI string) []byte {
-	resp, err := http.Get(baseAPI)
+	request, err := http.NewRequest(
+		http.MethodGet,
+		baseAPI,
+		nil,
+	)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
-	defer resp.Body.Close()
+	request.Header.Add("Accept", "application/json")
+	request.Header.Add("User-Agent", "Dark Jokes App ")
 
-	var jokeData []byte
-	json.NewDecoder(resp.Body).Decode(&jokeData)
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	return jokeData
+	responseBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return responseBytes
+
 }

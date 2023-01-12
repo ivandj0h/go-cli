@@ -13,10 +13,12 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "go-cli",
 	Short: "This App using Cobra CLI",
-	Long:  `This App using Cobra CLI`,
+	Long:  `Dark Jokes App using Cobra CLI`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	//Run: func(cmd *cobra.Command, args []string) {
+	//	fmt.Println("Hello World from Random Joke App")
+	//},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
